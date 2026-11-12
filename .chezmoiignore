@@ -1,5 +1,18 @@
+# Repository documentation and metadata
 README.md
 archive/**
 server.zshrc.local
 .DS_Store
 **/.DS_Store
+
+# SSH safety rules (prevent private keys and ephemeral state from being tracked)
+.ssh/known_hosts*
+.ssh/agent*
+.ssh/id_*
+.ssh/*.ppk
+.ssh/*.old
+.ssh/*.backup
+
+# SSH private host configurations (untracked, preserved locally on each machine)
+.ssh/config.local*
+.ssh/config.d/**

@@ -1,0 +1,39 @@
+Include /Users/Foo/.colima/ssh_config
+
+# Added by OrbStack: 'orb' SSH host for Linux machines
+Include ~/.orbstack/ssh/config
+
+# Include local uncommitted configurations (private IPs, servers, etc.)
+Include config.local
+Include config.d/*
+
+Host *
+    ServerAliveInterval 30
+    ServerAliveCountMax 5
+#     ProxyCommand              nc -X 5 -x 127.0.0.1:7890 %h %p
+
+Host 127.0.0.1
+    HostkeyAlgorithms +ssh-rsa
+
+Host github.com
+  HostName                  ssh.github.com
+  Port                      443
+  User                      git
+  PreferredAuthentications  publickey
+  IdentityFile ~/.ssh/id_yoitsu_pwless
+#  ProxyCommand              nc -X 5 -x 127.0.0.1:7890 %h %p
+
+Host ssh.github.com
+  HostName                  ssh.github.com
+  Port                      443
+  User                      git
+  PreferredAuthentications  publickey
+  IdentityFile ~/.ssh/id_foo_pwless
+#  ProxyCommand              nc -X 5 -x 127.0.0.1:7890 %h %p
+
+Host gitlab
+  HostName                  gitlab.com
+  Port                      22
+  User                      git
+  IdentityFile ~/.ssh/id_ed25519
+#  ProxyCommand              nc -X 5 -x 127.0.0.1:7890 %h %p
