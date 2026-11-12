@@ -165,3 +165,20 @@ bindkey '^Xi' insert-all-matches
 # Search history with text on the line, powered by Zle's history-search.
 bindkey "^[[A" history-beginning-search-backward
 bindkey "^[[B" history-beginning-search-forward
+
+# Optional fzf integrations (Ctrl-R history, Ctrl-T files, Alt-C cd)
+if (( $+commands[fzf] )); then
+  local fzf_dirs=(
+    "/opt/homebrew/opt/fzf/shell"
+    "/usr/local/opt/fzf/shell"
+    "/usr/share/fzf"
+    "$HOME/.fzf/shell"
+  )
+  for dir in $fzf_dirs; do
+    if [[ -d "$dir" ]]; then
+      [[ -f "$dir/key-bindings.zsh" ]] && source "$dir/key-bindings.zsh"
+      [[ -f "$dir/completion.zsh" ]] && source "$dir/completion.zsh"
+      break
+    fi
+  done
+fi

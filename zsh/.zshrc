@@ -249,17 +249,22 @@ GIT_SUBREPO_ROOT=/
 
 # 其它 {{{1
 
-# When starting as a non-login shell
-[[ -z $functions[j] && -f /etc/profile.d/autojump.zsh ]] && source /etc/profile.d/autojump.zsh
-# Debian Wheezy
-[[ -z $functions[j] && -f /usr/share/autojump/autojump.zsh ]] && source /usr/share/autojump/autojump.zsh
-# FreeBSD
-[[ -z $functions[j] && -f /usr/local/share/autojump/autojump.zsh ]] && source /usr/local/share/autojump/autojump.zsh
-[[ -z $functions[j] && -f ${_zdir}/.zsh/autojump.zsh ]] && source ${_zdir}/.zsh/autojump.zsh
-# if autojump loads but the directory is readonly, remove the chpwd hook
-if [[ ${chpwd_functions[(i)autojump_chpwd]} -le ${#chpwd_functions} && \
-  -d ~/.local/share/autojump && ! -w ~/.local/share/autojump ]]; then
-  chpwd_functions[(i)autojump_chpwd]=()
+# Directory navigation: zoxide (preferred) -> autojump -> native cd
+if (( $+commands[zoxide] )); then
+  eval "$(zoxide init zsh)"
+else
+  # When starting as a non-login shell
+  [[ -z $functions[j] && -f /etc/profile.d/autojump.zsh ]] && source /etc/profile.d/autojump.zsh
+  # Debian / Ubuntu
+  [[ -z $functions[j] && -f /usr/share/autojump/autojump.zsh ]] && source /usr/share/autojump/autojump.zsh
+  # FreeBSD / macOS
+  [[ -z $functions[j] && -f /usr/local/share/autojump/autojump.zsh ]] && source /usr/local/share/autojump/autojump.zsh
+  [[ -z $functions[j] && -f ${_zdir}/.zsh/autojump.zsh ]] && source ${_zdir}/.zsh/autojump.zsh
+  # if autojump loads but the directory is readonly, remove the chpwd hook
+  if [[ ${chpwd_functions[(i)autojump_chpwd]} -le ${#chpwd_functions} && \
+    -d ~/.local/share/autojump && ! -w ~/.local/share/autojump ]]; then
+    chpwd_functions[(i)autojump_chpwd]=()
+  fi
 fi
 
 _plugin=${_zdir}/.zsh/plugins/fast-syntax-highlighting/fast-syntax-highlighting.plugin.zsh

@@ -135,8 +135,11 @@ nmap tt :%s/\t/    /g<CR>
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 """""新文件标题
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"新建.c,.h,.sh,.java文件，自动插入文件头
-autocmd BufNewFile *.cpp,*.[ch],*.sh,*.rb,*.java,*.py exec ":call SetTitle()"
+" Automatically insert file header for new files (can be enabled via g:enable_auto_header = 1)
+let g:enable_auto_header = get(g:, 'enable_auto_header', 0)
+if g:enable_auto_header
+    autocmd BufNewFile *.cpp,*.[ch],*.sh,*.rb,*.java,*.py exec ":call SetTitle()"
+endif
 ""定义函数SetTitle，自动插入文件头
 func SetTitle()
 	"如果文件类型为.sh文件
@@ -211,7 +214,8 @@ imap <C-v> <Esc>"*pa
 imap <C-a> <Esc>^
 imap <C-e> <Esc>$
 vmap <C-c> "+y
-set mouse=v
+" Enable mouse in all modes (do not override with mouse=v)
+set mouse=a
 "set clipboard=unnamed
 "去空行
 nnoremap <F2> :g/^\s*$/d<CR>
@@ -233,7 +237,7 @@ func! CompileRunGcc()
 		exec "!g++ % -o %<"
 		exec "!time ./%<"
 	elseif &filetype == 'cpp'
-		exec "!g++ % -std=c++11 -o %<"
+		exec "!g++ % -std=c++17 -o %<"
 		exec "!time ./%<"
 	elseif &filetype == 'java'
 		exec "!javac %"
@@ -241,7 +245,7 @@ func! CompileRunGcc()
 	elseif &filetype == 'sh'
 		:!time bash %
 	elseif &filetype == 'python'
-		exec "!time python %"
+		exec "!time " . (executable('python3') ? 'python3' : 'python') . " %"
     elseif &filetype == 'html'
         exec "!firefox % &"
     elseif &filetype == 'go'
@@ -275,7 +279,13 @@ func FormartSrc()
     elseif &filetype == 'perl'
         exec "!astyle --style=gnu --suffix=none %"
     elseif &filetype == 'py'||&filetype == 'python'
-        exec "r !autopep8 -i --aggressive %"
+        if executable('ruff')
+            exec "!ruff format %"
+        elseif executable('black')
+            exec "!black %"
+        elseif executable('autopep8')
+            exec "!autopep8 -i --aggressive %"
+        endif
     elseif &filetype == 'java'
         exec "!astyle --style=java --suffix=none %"
     elseif &filetype == 'jsp'

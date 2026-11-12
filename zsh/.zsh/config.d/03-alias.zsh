@@ -1,15 +1,39 @@
 # 命令别名 {{{2
-alias ll='ls -lh'
-alias la='ls -A'
-if [[ $OS == 'Linux' ]]; then
+# Modern CLI alternatives with graceful degradation
+# ls family: eza -> lsd -> native ls
+if (( $+commands[eza] )); then
+  alias ls='eza --icons=auto'
+  alias ll='eza -lh --icons=auto'
+  alias la='eza -lha --icons=auto'
+  alias tree='eza --tree --icons=auto'
+elif (( $+commands[lsd] )); then
+  alias ls='lsd'
+  alias ll='lsd -l'
+  alias la='lsd -la'
+  alias tree='lsd --tree'
+elif [[ $OS == 'Linux' ]]; then
   alias ls='ls --color=auto'
+  alias ll='ls -lh'
+  alias la='ls -A'
 elif [[ $OS == 'FreeBSD' || $OS == 'Darwin' ]]; then
   alias ls='ls -G'
+  alias ll='ls -lh'
+  alias la='ls -A'
 elif (( $+commands[colorls] )); then
   alias ls='colorls -G'
+  alias ll='ls -lh'
+  alias la='ls -A'
 else
   alias ls='ls -F'
+  alias ll='ls -lh'
+  alias la='ls -A'
 fi
+
+# cat / pager: bat -> native cat
+if (( $+commands[bat] )); then
+  alias cat='bat --paging=never'
+fi
+
 if [[ $OS == 'Linux' || $OS == 'FreeBSD' || $OS == 'Darwin' ]]; then
   alias grep='grep --color=auto'
 fi
