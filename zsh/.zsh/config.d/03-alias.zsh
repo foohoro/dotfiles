@@ -47,6 +47,21 @@ alias nicest="nice -n19 ionice -c3"
 alias topnum="ps -e|sort -k4|awk '{print \$4}'|uniq -c|sort -n|tail"
 
 alias nonet="HTTP_PROXY='http://localhost:1' HTTPS_PROXY='http://localhost:1' FTP_PROXY='http://localhost:1' http_proxy='http://localhost:1' https_proxy='http://localhost:1' ftp_proxy='http://localhost:1'"
+
+# Quick toggle proxy functions
+proxy_on () {
+  local port="${1:-7890}"
+  export http_proxy="http://127.0.0.1:$port"
+  export https_proxy="http://127.0.0.1:$port"
+  export all_proxy="socks5://127.0.0.1:$port"
+  export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
+  printf 'Proxy set to 127.0.0.1:%s\n' "$port"
+}
+
+proxy_off () {
+  unset http_proxy https_proxy all_proxy no_proxy
+  printf 'Proxy environment variables unset\n'
+}
 alias fromgbk="iconv -t latin1 | iconv -f gb18030"
 alias swaptop='watch -n 1 "swapview | tail -\$((\$LINES - 2)) | cut -b -\$COLUMNS"'
 alias pkg-check='comm -23 <(pacman -Qetq|sort) <(awk ''{print $1}'' ~/etc/pkg-why|sort) | shuf | tail -$(( LINES - 4 ))'
