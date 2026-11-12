@@ -30,6 +30,21 @@ symbol = "git:"
 style = "bold yellow"
 format = "[$symbol$branch]($style) "
 
+# Git status: human-readable textual labels instead of cryptic symbols
+[git_status]
+style = "bold red"
+format = '([\[$all_status$ahead_behind\]]($style) )'
+modified = "modified "
+untracked = "untracked "
+staged = "staged "
+renamed = "renamed "
+deleted = "deleted "
+stashed = "stashed "
+ahead = "ahead "
+behind = "behind "
+diverged = "diverged "
+conflicted = "conflicted "
+
 # Background jobs: replicate %(1j.%{${E}[1;33m%}%j .)%{${E}[m%}
 # Only shown when there are 1 or more background jobs
 [jobs]
