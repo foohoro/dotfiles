@@ -62,101 +62,106 @@ typeset -U FPATH
 # %n --- 用户名
 # %~ --- 当前目录
 # %h --- 历史记录号
-# git 分支显示 {{{3
+# Prompt configuration: starship (opportunistic) -> native fallback with async git branch
+if (( $+commands[starship] )); then
+  eval "$(starship init zsh)"
+else
+  # Native prompt setup {{{3
+  if (( $+commands[git] )); then
+    _nogit_dir=()
+    for p in $nogit_dir; do
+      [[ -d $p ]] && _nogit_dir+=$(realpath $p)
+    done
+    unset p
 
-if (( $+commands[git] )); then
-  _nogit_dir=()
-  for p in $nogit_dir; do
-    [[ -d $p ]] && _nogit_dir+=$(realpath $p)
-  done
-  unset p
+    _setup_current_branch_async () { # {{{4
+      typeset -g _current_branch= vcs_info_fd=
+      zmodload zsh/zselect 2>/dev/null
 
-  _setup_current_branch_async () { # {{{4
-    typeset -g _current_branch= vcs_info_fd=
-    zmodload zsh/zselect 2>/dev/null
+      _vcs_update_info () {
+        eval $(read -rE -u$1)
+        zle -F $1 && vcs_info_fd=
+        exec {1}>&-
+        # update prompt only when necessary to avoid double first line
+        [[ -n $_current_branch ]] && zle reset-prompt
+      }
 
-    _vcs_update_info () {
-      eval $(read -rE -u$1)
-      zle -F $1 && vcs_info_fd=
-      exec {1}>&-
-      # update prompt only when necessary to avoid double first line
-      [[ -n $_current_branch ]] && zle reset-prompt
+      _set_current_branch () {
+        _current_branch=
+        [[ -n $vcs_info_fd ]] && zle -F $vcs_info_fd
+        cwd=$(pwd -P)
+        for p in $_nogit_dir; do
+          if [[ $cwd == $p* ]]; then
+            return
+          fi
+        done
+
+        setopt localoptions no_monitor
+        coproc {
+          _br=$(git branch --no-color 2>/dev/null)
+          if [[ $? -eq 0 ]]; then
+            _current_branch=$(echo $_br|awk '$1 == "*" {print "%{\x1b[33m%}(git)-[" substr($0, 3) "]"}')
+          fi
+          # always gives something for reading, or _vcs_update_info won't be
+          # called, fd not closed
+          #
+          # "typeset -p" won't add "-g", so reprinting prompt (e.g. after status
+          # of a bg job is printed) would miss it
+          #
+          # need to substitute single ' with double ''
+          print "typeset -g _current_branch='${_current_branch//''''/''}'"
+        }
+        disown %{\ _br 2>/dev/null
+        exec {vcs_info_fd}<&p
+        # wait 0.1 seconds before showing up to avoid unnecessary double update
+        # precmd functions are called *after* prompt is expanded, and we can't call
+        # zle reset-prompt outside zle, so turn to zselect
+        zselect -r -t 10 $vcs_info_fd 2>/dev/null
+        zle -F $vcs_info_fd _vcs_update_info
+      }
     }
 
-    _set_current_branch () {
-      _current_branch=
-      [[ -n $vcs_info_fd ]] && zle -F $vcs_info_fd
-      cwd=$(pwd -P)
-      for p in $_nogit_dir; do
-        if [[ $cwd == $p* ]]; then
-          return
-        fi
-      done
+    _setup_current_branch_sync () { # {{{4
+      _set_current_branch () {
+        _current_branch=
+        cwd=$(pwd -P)
+        for p in $_nogit_dir; do
+          if [[ $cwd == $p* ]]; then
+            return
+          fi
+        done
 
-      setopt localoptions no_monitor
-      coproc {
         _br=$(git branch --no-color 2>/dev/null)
         if [[ $? -eq 0 ]]; then
-          _current_branch=$(echo $_br|awk '$1 == "*" {print "%{\x1b[33m%}(git)-[" substr($0, 3) "]"}')
+          _current_branch=$(echo $_br|awk '{if($1 == "*"){print "%{\x1b[33m%}(git)-[" substr($0, 3) "]"}}')
         fi
-        # always gives something for reading, or _vcs_update_info won't be
-        # called, fd not closed
-        #
-        # "typeset -p" won't add "-g", so reprinting prompt (e.g. after status
-        # of a bg job is printed) would miss it
-        #
-        # need to substitute single ' with double ''
-        print "typeset -g _current_branch='${_current_branch//''''/''}'"
       }
-      disown %{\ _br 2>/dev/null
-      exec {vcs_info_fd}<&p
-      # wait 0.1 seconds before showing up to avoid unnecessary double update
-      # precmd functions are called *after* prompt is expanded, and we can't call
-      # zle reset-prompt outside zle, so turn to zselect
-      zselect -r -t 10 $vcs_info_fd 2>/dev/null
-      zle -F $vcs_info_fd _vcs_update_info
-    }
-  }
+    } # }}}
 
-  _setup_current_branch_sync () { # {{{4
-    _set_current_branch () {
-      _current_branch=
-      cwd=$(pwd -P)
-      for p in $_nogit_dir; do
-        if [[ $cwd == $p* ]]; then
-          return
-        fi
-      done
-
-      _br=$(git branch --no-color 2>/dev/null)
-      if [[ $? -eq 0 ]]; then
-        _current_branch=$(echo $_br|awk '{if($1 == "*"){print "%{\x1b[33m%}(git)-[" substr($0, 3) "]"}}')
-      fi
-    }
-  } # }}}
-
-  if [[ $_has_re -ne 1 ||
-    $ZSH_VERSION =~ '^[0-4]\.' || $ZSH_VERSION =~ '^5\.0\.[0-5]' ]]; then
-    # zsh 5.0.5 has a CPU 100% bug with zle -F
-    _setup_current_branch_sync
-  else
-    _setup_current_branch_async
+    if [[ $_has_re -ne 1 ||
+      $ZSH_VERSION =~ '^[0-4]\.' || $ZSH_VERSION =~ '^5\.0\.[0-5]' ]]; then
+      # zsh 5.0.5 has a CPU 100% bug with zle -F
+      _setup_current_branch_sync
+    else
+      _setup_current_branch_async
+    fi
+    typeset -gaU precmd_functions
+    precmd_functions+=_set_current_branch
   fi
-  typeset -gaU precmd_functions
-  precmd_functions+=_set_current_branch
-fi
-# }}}3
-[[ -n $ZSH_PS_HOST && $ZSH_PS_HOST != \(*\)\  ]] && ZSH_PS_HOST="($ZSH_PS_HOST) "
-setopt PROMPT_SUBST
-E=$'\x1b'
-# reset on the second line to make it the same in tmux + ncurses 6.0
-PS1="${E} %B%F{red}%(?..%? )%f%b%B%F{blue}%n%f%b@%M %B%60<..<%~%<< %b\$_current_branch 
+  # }}}3
+
+  [[ -n $ZSH_PS_HOST && $ZSH_PS_HOST != \(*\)\  ]] && ZSH_PS_HOST="($ZSH_PS_HOST) "
+  setopt PROMPT_SUBST
+  E=$'\x1b'
+  # reset on the second line to make it the same in tmux + ncurses 6.0
+  PS1="${E} %B%F{red}%(?..%? )%f%b%B%F{blue}%n%f%b@%M %B%60<..<%~%<< %b\$_current_branch 
 %{${E}[0m%}%(!.%{${E}[0;31m%}#.%{${E}[1;34m%}$)%{${E}[0m%} "
-# 次提示符：使用暗色
-PS2="%{${E}[2m%}%_>%{${E}[0m%} "
-# 右边的提示
-RPS1="%(1j.%{${E}[1;33m%}%j .)%{${E}[m%}%*"
-unset E
+  # 次提示符：使用暗色
+  PS2="%{${E}[2m%}%_>%{${E}[0m%} "
+  # 右边的提示
+  RPS1="%(1j.%{${E}[1;33m%}%j .)%{${E}[m%}%*"
+  unset E
+fi
 
 CORRECT_IGNORE='_*'
 READNULLCMD=less
