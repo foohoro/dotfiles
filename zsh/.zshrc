@@ -64,6 +64,7 @@ typeset -U FPATH
 # %h --- 历史记录号
 # Prompt configuration: starship (opportunistic) -> native fallback with async git branch
 if (( $+commands[starship] )); then
+  [[ -z "$STARSHIP_CONFIG" && -f "$HOME/dotfiles/starship/.config/starship.toml" && ! -f "$HOME/.config/starship.toml" ]] && export STARSHIP_CONFIG="$HOME/dotfiles/starship/.config/starship.toml"
   eval "$(starship init zsh)"
 else
   # Native prompt setup {{{3

@@ -1,0 +1,63 @@
+# Starship Configuration
+# Replicates original grml/lilydjwg dotfiles layout and behavior
+
+# Prevent extra empty blank lines between commands
+add_newline = false
+
+# Left prompt: two lines with exit code, directory, git info on first line, and character on second line
+format = """$status$directory$git_branch$git_status$line_break$character"""
+
+# Right prompt: background jobs and current time (replicates classic RPS1, displayed on first line)
+right_format = """$jobs$time"""
+
+# Replicate grml failed exit code (%B%F{red}%(?..%? )%f%b):
+# Only visible when the previous command fails, displayed in bold red
+[status]
+disabled = false
+format = '[$status ]($style)'
+style = "bold red"
+symbol = ""
+
+# Directory configuration: disable path truncation on two-line prompt (replicates full path %~)
+[directory]
+truncation_length = 0
+truncate_to_repo = false
+style = "bold cyan"
+
+# Git branch: plain text prefix to avoid missing glyph question marks without Nerd Font
+[git_branch]
+symbol = "git:"
+style = "bold yellow"
+format = "[$symbol$branch]($style) "
+
+# Background jobs: replicate %(1j.%{${E}[1;33m%}%j .)%{${E}[m%}
+# Only shown when there are 1 or more background jobs
+[jobs]
+symbol = "✦ "
+threshold = 1
+number_threshold = 1
+style = "bold yellow"
+format = "[$symbol$number ]($style)"
+
+# Time: replicate 24-hour HH:MM:SS format (%*) with clear non-dimmed white
+[time]
+disabled = false
+time_format = "%T"
+style = "white"
+format = "[$time]($style)"
+
+# Prompt character on second line (replicates %(!.#.$))
+[character]
+success_symbol = "[\\$](bold blue) "
+error_symbol = "[\\$](bold red) "
+vicmd_symbol = "[V](bold green) "
+
+# Disable noisy cloud credentials by default
+[gcloud]
+disabled = true
+
+[aws]
+disabled = true
+
+[azure]
+disabled = true
