@@ -1,0 +1,63 @@
+# server.zshrc.local
+# Standalone lightweight configuration for remote servers (designed for grml-zsh-config)
+# Usage: curl -fLo ~/.zshrc.local <URL_TO_THIS_FILE>
+
+# Ensure user binary paths
+typeset -U path PATH
+for p in "$HOME/.local/bin" "$HOME/bin" "/usr/local/bin"; do
+  [[ -d "$p" ]] && path=("$p" $path)
+done
+
+# Default editor
+[[ -z $EDITOR ]] && (( $+commands[vim] )) && export EDITOR=vim
+
+# Modern CLI tool aliases with standard fallbacks
+if (( $+commands[eza] )); then
+  alias ls='eza'
+  alias ll='eza -lh'
+  alias la='eza -lha'
+  alias tree='eza --tree'
+elif (( $+commands[lsd] )); then
+  alias ls='lsd'
+  alias ll='lsd -l'
+  alias la='lsd -la'
+  alias tree='lsd --tree'
+else
+  alias ls='ls --color=auto'
+  alias ll='ls -lh'
+  alias la='ls -A'
+fi
+
+if (( $+commands[bat] )); then
+  alias cat='bat --paging=never'
+fi
+
+alias grep='grep --color=auto'
+
+# Global aliases
+alias -g NUL="/dev/null"
+alias -g NN="*(oc[1])"
+alias -g NNF="*(oc[1].)"
+alias -g NND="*(oc[1]/)"
+
+# Proxy convenience functions
+proxy_on () {
+  local port="${1:-7890}"
+  export http_proxy="http://127.0.0.1:$port"
+  export https_proxy="http://127.0.0.1:$port"
+  export all_proxy="socks5://127.0.0.1:$port"
+  export no_proxy="localhost,127.0.0.1,localaddress,.localdomain.com"
+  printf 'Proxy set to 127.0.0.1:%s\n' "$port"
+}
+
+proxy_off () {
+  unset http_proxy https_proxy all_proxy no_proxy
+  printf 'Proxy environment variables unset\n'
+}
+
+alias nonet="HTTP_PROXY='http://localhost:1' HTTPS_PROXY='http://localhost:1' FTP_PROXY='http://localhost:1' http_proxy='http://localhost:1' https_proxy='http://localhost:1' ftp_proxy='http://localhost:1'"
+
+# Systemd shortcut on Linux
+if (( $+commands[systemctl] )); then
+  alias sysuser="systemctl --user"
+fi

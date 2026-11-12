@@ -28,6 +28,7 @@ zmodload zsh/subreap 2>/dev/null && subreap
 for file in  $_zdir/.zsh/config.d/* ; do 
     source  "$file"
 done
+typeset -g _HORO_MODULES_LOADED=1
 
 # 选项设置 -> $_zdir/.zsh/config.d/00-options
 # 补全与 zstyle -> $_zdir/.zsh/config.d/01-zstyle
@@ -55,6 +56,7 @@ typeset -U FPATH
 }
 [[ -z $EDITOR ]] && (( $+commands[vim] )) && export EDITOR=vim
 
+[[ -f $_zdir/.zshrc.local ]] && source $_zdir/.zshrc.local
 [[ -f $_zdir/.zsh/zshrc.local ]] && source $_zdir/.zsh/zshrc.local
 
 # zsh {{{2

@@ -1,0 +1,29 @@
+# ~/.zshrc.local
+# Managed by chezmoi (OS: {{ .chezmoi.os }})
+
+# Load modular configs if not already loaded by parent .zshrc (e.g. when using grml)
+if [[ -z "$_HORO_MODULES_LOADED" ]]; then
+  for conf in ~/.zsh/config.d/0*.zsh; do
+    [[ -r "$conf" ]] && source "$conf"
+  done
+fi
+
+{{- if eq .chezmoi.os "darwin" }}
+# macOS specific configurations
+[[ -r ~/.zsh/config.d/80-darwin.zsh ]] && source ~/.zsh/config.d/80-darwin.zsh
+{{- else if eq .chezmoi.os "linux" }}
+# Linux specific configurations
+[[ -r ~/.zsh/config.d/80-linux.zsh ]] && source ~/.zsh/config.d/80-linux.zsh
+{{- end }}
+
+# Modern CLI tools (opportunistic initialization)
+if (( $+commands[starship] )); then
+  eval "$(starship init zsh)"
+fi
+
+if (( $+commands[zoxide] )); then
+  eval "$(zoxide init zsh)"
+fi
+
+# Load machine-specific private configurations if present (tokens, corporate proxies, etc.)
+[[ -r ~/.zshrc.local.private ]] && source ~/.zshrc.local.private
