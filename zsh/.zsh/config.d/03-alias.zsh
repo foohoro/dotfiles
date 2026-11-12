@@ -1,11 +1,11 @@
 # 命令别名 {{{2
 # Modern CLI alternatives with graceful degradation
-# ls family: eza -> lsd -> native ls
+# ls family: eza -> lsd -> native ls (no icons by default to avoid missing glyphs without Nerd Font)
 if (( $+commands[eza] )); then
-  alias ls='eza --icons=auto'
-  alias ll='eza -lh --icons=auto'
-  alias la='eza -lha --icons=auto'
-  alias tree='eza --tree --icons=auto'
+  alias ls='eza'
+  alias ll='eza -lh'
+  alias la='eza -lha'
+  alias tree='eza --tree'
 elif (( $+commands[lsd] )); then
   alias ls='lsd'
   alias ll='lsd -l'
