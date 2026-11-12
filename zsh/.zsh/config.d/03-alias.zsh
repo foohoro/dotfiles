@@ -3,14 +3,14 @@ alias ll='ls -lh'
 alias la='ls -A'
 if [[ $OS == 'Linux' ]]; then
   alias ls='ls --color=auto'
-elif [[ $OS == 'FreeBSD' ]]; then
+elif [[ $OS == 'FreeBSD' || $OS == 'Darwin' ]]; then
   alias ls='ls -G'
 elif (( $+commands[colorls] )); then
   alias ls='colorls -G'
 else
   alias ls='ls -F'
 fi
-if [[ $OS == 'Linux' || $OS == 'FreeBSD' ]]; then
+if [[ $OS == 'Linux' || $OS == 'FreeBSD' || $OS == 'Darwin' ]]; then
   alias grep='grep --color=auto'
 fi
 

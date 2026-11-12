@@ -19,8 +19,6 @@ compinit
 OS=${$(uname)%_*}
 if [[ $OS == "CYGWIN" || $OS == "MSYS" ]]; then
   OS=Linux
-elif [[ $OS == "Darwin" ]]; then
-  OS=FreeBSD
 fi
 # check first, or the script will end wherever it fails
 zmodload zsh/regex 2>/dev/null && _has_re=1 || _has_re=0
@@ -282,31 +280,4 @@ precmd() {
   echo -n -e "\033]0;$(whoami)@$(hostname):$(pwd)\007"
 }
 
-unset OS
 setopt nomatch
-return 0
-
-
-# Added by Antigravity
-export PATH="/Users/Foo/.antigravity/antigravity/bin:$PATH"
-
-# opencode
-export PATH=/Users/Foo/.opencode/bin:$PATH
-
-# Added by Antigravity IDE
-export PATH="/Users/Foo/.antigravity-ide/antigravity-ide/bin:$PATH"
-
-
-# Added by Antigravity CLI installer
-export PATH="/Users/Foo/.local/bin:$PATH"
-
-# pnpm
-export PNPM_HOME="/Users/Foo/Library/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME/bin:"*) ;;
-  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
-esac
-# pnpm end
-
-# Added by Antigravity IDE
-export PATH="/Users/Foo/.antigravity-ide/antigravity-ide/bin:$PATH"

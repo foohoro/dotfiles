@@ -1,22 +1,29 @@
-# Added by Antigravity
-export PATH="/Users/Foo/.antigravity/antigravity/bin:$PATH"
+# Environment paths configuration
+# Keep path unique
+typeset -U path PATH
 
-# opencode
-export PATH=/Users/Foo/.opencode/bin:$PATH
+# Common candidate binary directories
+local candidate_paths=(
+  "$HOME/.local/bin"
+  "$HOME/bin"
+  "$HOME/.cargo/bin"
+  "$HOME/go/bin"
+  "$HOME/.opencode/bin"
+  "$HOME/.antigravity/antigravity/bin"
+  "$HOME/.antigravity-ide/antigravity-ide/bin"
+  "/opt/homebrew/bin"
+  "/usr/local/bin"
+)
 
-# Added by Antigravity IDE
-export PATH="/Users/Foo/.antigravity-ide/antigravity-ide/bin:$PATH"
+for p in $candidate_paths; do
+  [[ -d "$p" ]] && path=("$p" $path)
+done
 
-
-# Added by Antigravity CLI installer
-export PATH="/Users/Foo/.local/bin:$PATH"
-
-# pnpm
-export PNPM_HOME="/Users/Foo/Library/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME/bin:"*) ;;
-  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
-esac
-# pnpm end
-
-
+# pnpm setup
+if [[ -d "$HOME/Library/pnpm" ]]; then
+  export PNPM_HOME="$HOME/Library/pnpm"
+  path=("$PNPM_HOME" $path)
+elif [[ -d "$HOME/.local/share/pnpm" ]]; then
+  export PNPM_HOME="$HOME/.local/share/pnpm"
+  path=("$PNPM_HOME" $path)
+fi
