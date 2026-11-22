@@ -1,4 +1,5 @@
 # Repository documentation and metadata
+AGENTS.md
 README.md
 archive/**
 server.zshrc.local
