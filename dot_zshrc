@@ -54,7 +54,20 @@ typeset -U FPATH
   local n=$(nproc)
   export MAKEFLAGS="-j$n -l$n"
 }
-[[ -z $EDITOR ]] && (( $+commands[vim] )) && export EDITOR=vim
+# Pick the first available editor from a candidate list
+_pick_editor () {
+  local ed
+  for ed in "$@"; do
+    if (( $+commands[$ed] )); then
+      print -r -- "$ed"
+      return 0
+    fi
+  done
+  return 1
+}
+
+[[ -z $EDITOR ]] && EDITOR=$(_pick_editor nvim vim nano vi) && export EDITOR
+[[ -z $VISUAL && -n $EDITOR ]] && export VISUAL=$EDITOR
 
 [[ -f $_zdir/.zshrc.local ]] && source $_zdir/.zshrc.local
 [[ -f $_zdir/.zsh/zshrc.local ]] && source $_zdir/.zsh/zshrc.local

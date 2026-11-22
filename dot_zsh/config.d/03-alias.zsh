@@ -134,6 +134,36 @@ function juser () {
 }
 alias privoxy_log="juser -u privoxy -a -f | ssed -R 's/(?<=\]:) [\d-]+ [\d:.]+ [\da-f]+//'"
 
+# Prefer nano for git commit/tag messages; fall back to global editor for other subcommands
+git () {
+  local subcmd="" skip_next=0 arg
+  for arg in "$@"; do
+    if (( skip_next )); then
+      skip_next=0
+      continue
+    fi
+    case "$arg" in
+      --) break ;;
+      -C|-c|--git-dir|--work-tree|--namespace|--super-prefix|--config-env)
+        skip_next=1 ;;
+      -*) ;;
+      *)
+        subcmd="$arg"
+        break ;;
+    esac
+  done
+
+  case "$subcmd" in
+    commit|tag)
+      if [[ -z $GIT_EDITOR ]] && (( $+commands[nano] )); then
+        GIT_EDITOR=nano command git "$@"
+        return $?
+      fi
+      ;;
+  esac
+  command git "$@"
+}
+
 # 后缀别名 {{{2
 alias -s xsl="vim"
 alias -s {html,htm}="firefox"

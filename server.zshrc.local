@@ -8,8 +8,50 @@ for p in "$HOME/.local/bin" "$HOME/bin" "/usr/local/bin"; do
   [[ -d "$p" ]] && path=("$p" $path)
 done
 
-# Default editor
-[[ -z $EDITOR ]] && (( $+commands[vim] )) && export EDITOR=vim
+# Default editor (nvim > vim > nano > vi)
+_pick_editor () {
+  local ed
+  for ed in "$@"; do
+    if (( $+commands[$ed] )); then
+      print -r -- "$ed"
+      return 0
+    fi
+  done
+  return 1
+}
+
+[[ -z $EDITOR ]] && EDITOR=$(_pick_editor nvim vim nano vi) && export EDITOR
+[[ -z $VISUAL && -n $EDITOR ]] && export VISUAL=$EDITOR
+
+# Prefer nano for git commit/tag messages; fall back to global editor for other subcommands
+git () {
+  local subcmd="" skip_next=0 arg
+  for arg in "$@"; do
+    if (( skip_next )); then
+      skip_next=0
+      continue
+    fi
+    case "$arg" in
+      --) break ;;
+      -C|-c|--git-dir|--work-tree|--namespace|--super-prefix|--config-env)
+        skip_next=1 ;;
+      -*) ;;
+      *)
+        subcmd="$arg"
+        break ;;
+    esac
+  done
+
+  case "$subcmd" in
+    commit|tag)
+      if [[ -z $GIT_EDITOR ]] && (( $+commands[nano] )); then
+        GIT_EDITOR=nano command git "$@"
+        return $?
+      fi
+      ;;
+  esac
+  command git "$@"
+}
 
 # Check if a command exists and is not disabled via DOTFILES_VANILLA or DOTFILES_DISABLE
 _has_tool () {
