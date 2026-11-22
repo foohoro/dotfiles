@@ -6,6 +6,19 @@ _has_tool () {
   (( $+commands[$cmd] ))
 }
 
+# Initialize starship prompt with an ASCII-safe config on Linux virtual consoles ($TERM == linux)
+_init_starship () {
+  if [[ -z "$STARSHIP_CONFIG" ]]; then
+    local cfg_dir="${XDG_CONFIG_HOME:-$HOME/.config}"
+    if [[ $TERM == linux && -f "$cfg_dir/starship-tty.toml" ]]; then
+      export STARSHIP_CONFIG="$cfg_dir/starship-tty.toml"
+    elif [[ -f "$HOME/dotfiles/starship/.config/starship.toml" && ! -f "$cfg_dir/starship.toml" ]]; then
+      export STARSHIP_CONFIG="$HOME/dotfiles/starship/.config/starship.toml"
+    fi
+  fi
+  eval "$(starship init zsh)"
+}
+
 # 选项设置{{{1
 unsetopt beep
 # 自动记住已访问目录栈
