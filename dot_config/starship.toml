@@ -4,8 +4,8 @@
 # Prevent extra empty blank lines between commands
 add_newline = false
 
-# Left prompt: two lines with exit code, directory, git info on first line, and character on second line
-format = """$status$directory$git_branch$git_status$line_break$character"""
+# Left prompt: two lines with exit code, directory, git info, python on first line, and character on second line
+format = """$status$directory$git_branch$git_status$python${custom.venv_path}$line_break$character"""
 
 # Right prompt: background jobs and current time (replicates classic RPS1, displayed on first line)
 right_format = """$jobs$time"""
@@ -66,6 +66,13 @@ format = "[$time]($style)"
 success_symbol = "[\\$](bold blue) "
 error_symbol = "[\\$](bold red) "
 vicmd_symbol = "[V](bold green) "
+
+# Show virtualenv path when active outside its owning directory
+[custom.venv_path]
+when = '[ -n "$VIRTUAL_ENV" ] && [ "${VIRTUAL_ENV%/*}" != "$PWD" ]'
+command = 'case "$VIRTUAL_ENV" in "$HOME"*) printf "@ ~%s\n" "${VIRTUAL_ENV#$HOME}" ;; *) printf "@ %s\n" "$VIRTUAL_ENV" ;; esac'
+style = "yellow"
+format = "([$output]($style) )"
 
 # Disable noisy cloud credentials by default
 [gcloud]
