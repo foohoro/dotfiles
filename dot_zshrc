@@ -188,7 +188,7 @@ if [[ -n $DISPLAY && -z $SSH_CONNECTION ]]; then
 else
   export AGV_EDITOR='vim +"call setpos(\".\", [0, $line, $col, 0])" ''$file'''
 fi
-if [[ -n $DISPLAY || -n $SSH_CONNECTION ]]; then
+if [[ -n $DISPLAY || -n $WAYLAND_DISPLAY || -n $SSH_CONNECTION || $OSTYPE == darwin* ]]; then
   # 让 less 将粗体/下划线等显示为彩色
   export LESS_TERMCAP_mb=$'\x1b[01;31m'
   export LESS_TERMCAP_md=$'\x1b[01;38;5;74m'
