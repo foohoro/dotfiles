@@ -11,13 +11,21 @@ done
 # Default editor
 [[ -z $EDITOR ]] && (( $+commands[vim] )) && export EDITOR=vim
 
+# Check if a command exists and is not disabled via DOTFILES_VANILLA or DOTFILES_DISABLE
+_has_tool () {
+  local cmd="$1"
+  [[ -n "$DOTFILES_VANILLA" ]] && return 1
+  [[ ",${DOTFILES_DISABLE// /,}," == *",${cmd},"* ]] && return 1
+  (( $+commands[$cmd] ))
+}
+
 # Modern CLI tool aliases with standard fallbacks
-if (( $+commands[eza] )); then
+if _has_tool eza; then
   alias ls='eza'
   alias ll='eza -lh'
   alias la='eza -lha'
   alias tree='eza --tree'
-elif (( $+commands[lsd] )); then
+elif _has_tool lsd; then
   alias ls='lsd'
   alias ll='lsd -l'
   alias la='lsd -la'
@@ -28,7 +36,7 @@ else
   alias la='ls -A'
 fi
 
-if (( $+commands[bat] )); then
+if _has_tool bat; then
   alias cat='bat --paging=never'
 fi
 
@@ -53,6 +61,15 @@ proxy_on () {
 proxy_off () {
   unset http_proxy https_proxy all_proxy no_proxy
   printf 'Proxy environment variables unset\n'
+}
+
+# Launch a subshell with modern CLI alternatives disabled for testing graceful degradation
+vanilla () {
+  if (( $# )); then
+    DOTFILES_VANILLA= DOTFILES_DISABLE="${(j:,:)@}" zsh
+  else
+    DOTFILES_VANILLA=1 DOTFILES_DISABLE= zsh
+  fi
 }
 
 alias nonet="HTTP_PROXY='http://localhost:1' HTTPS_PROXY='http://localhost:1' FTP_PROXY='http://localhost:1' http_proxy='http://localhost:1' https_proxy='http://localhost:1' ftp_proxy='http://localhost:1'"

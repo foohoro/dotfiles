@@ -1,12 +1,12 @@
 # 命令别名 {{{2
 # Modern CLI alternatives with graceful degradation
 # ls family: eza -> lsd -> native ls (no icons by default to avoid missing glyphs without Nerd Font)
-if (( $+commands[eza] )); then
+if _has_tool eza; then
   alias ls='eza'
   alias ll='eza -lh'
   alias la='eza -lha'
   alias tree='eza --tree'
-elif (( $+commands[lsd] )); then
+elif _has_tool lsd; then
   alias ls='lsd'
   alias ll='lsd -l'
   alias la='lsd -la'
@@ -19,7 +19,7 @@ elif [[ $OS == 'FreeBSD' || $OS == 'Darwin' ]]; then
   alias ls='ls -G'
   alias ll='ls -lh'
   alias la='ls -A'
-elif (( $+commands[colorls] )); then
+elif _has_tool colorls; then
   alias ls='colorls -G'
   alias ll='ls -lh'
   alias la='ls -A'
@@ -30,7 +30,7 @@ else
 fi
 
 # cat / pager: bat -> native cat
-if (( $+commands[bat] )); then
+if _has_tool bat; then
   alias cat='bat --paging=never'
 fi
 
@@ -85,6 +85,15 @@ proxy_on () {
 proxy_off () {
   unset http_proxy https_proxy all_proxy no_proxy
   printf 'Proxy environment variables unset\n'
+}
+
+# Launch a subshell with modern CLI alternatives disabled for testing graceful degradation
+vanilla () {
+  if (( $# )); then
+    DOTFILES_VANILLA= DOTFILES_DISABLE="${(j:,:)@}" zsh
+  else
+    DOTFILES_VANILLA=1 DOTFILES_DISABLE= zsh
+  fi
 }
 alias fromgbk="iconv -t latin1 | iconv -f gb18030"
 alias swaptop='watch -n 1 "swapview | tail -\$((\$LINES - 2)) | cut -b -\$COLUMNS"'

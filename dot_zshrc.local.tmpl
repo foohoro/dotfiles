@@ -17,11 +17,11 @@ fi
 {{- end }}
 
 # Modern CLI tools (opportunistic initialization)
-if (( $+commands[starship] )); then
+if _has_tool starship; then
   eval "$(starship init zsh)"
 fi
 
-if (( $+commands[zoxide] )); then
+if _has_tool zoxide; then
   eval "$(zoxide init zsh)"
 fi
 

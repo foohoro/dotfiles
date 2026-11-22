@@ -1,3 +1,11 @@
+# Check if a command exists and is not disabled via DOTFILES_VANILLA or DOTFILES_DISABLE
+_has_tool () {
+  local cmd="$1"
+  [[ -n "$DOTFILES_VANILLA" ]] && return 1
+  [[ ",${DOTFILES_DISABLE// /,}," == *",${cmd},"* ]] && return 1
+  (( $+commands[$cmd] ))
+}
+
 # 选项设置{{{1
 unsetopt beep
 # 自动记住已访问目录栈

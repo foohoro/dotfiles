@@ -167,7 +167,7 @@ bindkey "^[[A" history-beginning-search-backward
 bindkey "^[[B" history-beginning-search-forward
 
 # Optional fzf integrations (Ctrl-R history, Ctrl-T files, Alt-C cd)
-if (( $+commands[fzf] )); then
+if _has_tool fzf; then
   local fzf_dirs=(
     "/opt/homebrew/opt/fzf/shell"
     "/usr/local/opt/fzf/shell"
